@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تسجيل دخول | بايوجرام</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-storage-compat.js"></script>
+</head>
+<body>
+  <div class="login-container">
+    <h1>مرحبًا بك في بايوجرام</h1>
+    <p>سجّل دخولك باستخدام رقم الهاتف</p>
+    <input type="tel" id="phoneNumber" placeholder="أدخل رقم الهاتف" />
+    <div id="recaptcha-container"></div>
+    <button id="sendCodeBtn">إرسال كود التحقق</button>
+
+    <input type="text" id="verificationCode" placeholder="أدخل كود التحقق" style="display:none" />
+    <button id="verifyCodeBtn" style="display:none">تحقق وتسجيل الدخول</button>
+  </div>
+<script src="login.js"></script>
+</body>
+</html>
