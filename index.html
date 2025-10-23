@@ -1,19 +1,438 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bioqram</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>تسلسجرام — العرّاب | KoZmo</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-1: #071428;
+    --bg-2: #071f35;
+    --card: rgba(255,255,255,0.03);
+    --accent: #6ee7ff;
+    --accent-2: #8b5cf6;
+    --muted: rgba(255,255,255,0.6);
+    --glass: rgba(255,255,255,0.02);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:'Cairo',sans-serif;
+    background: radial-gradient(600px 400px at 10% 10%, rgba(139,92,246,0.08), transparent),
+                linear-gradient(180deg,var(--bg-1), var(--bg-2));
+    color:#eaf6ff;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    display:flex; flex-direction:column;
+    min-height:100vh;
+  }
+
+  header{
+    padding:18px 26px;
+    display:flex;
+    align-items:center;
+    gap:18px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    backdrop-filter: blur(6px);
+  }
+  .brand{font-weight:700;color:var(--accent);font-size:1.15rem;display:flex;gap:10px;align-items:center}
+  .brand .logo{
+    width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    display:flex;align-items:center;justify-content:center;font-weight:800;color:#002233;box-shadow:0 6px 20px rgba(139,92,246,0.15);
+  }
+  .sub{color:var(--muted);font-size:0.95rem}
+
+  .layout{flex:1;display:flex;gap:18px;padding:20px;max-width:1200px;margin:0 auto;width:100%}
+
+  /* sidebar */
+  .sidebar{
+    width:300px;padding:12px;border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+    height:calc(100vh - 140px); overflow:auto; box-shadow: 0 10px 40px rgba(2,6,23,0.6);
+  }
+  .searchWrap{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+  .searchWrap input{
+    flex:1;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit;
+  }
+  .createBtn{width:100%;padding:10px;border-radius:12px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#002233;font-weight:700;cursor:pointer;margin-bottom:12px;box-shadow:0 8px 24px rgba(107,198,255,0.08)}
+
+  .usersList{display:flex;flex-direction:column;gap:8px}
+  .userItem{
+    display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;cursor:pointer;transition:all .18s;
+    border:1px solid rgba(255,255,255,0.02);
+  }
+  .userItem:hover{transform:translateY(-3px);background:linear-gradient(90deg, rgba(255,255,255,0.012), rgba(255,255,255,0.008))}
+  .avatar{width:44px;height:44px;border-radius:10px;background:linear-gradient(90deg,#123047,#2b9af3);display:flex;align-items:center;justify-content:center;font-weight:700}
+  .meta{min-width:0}
+  .meta .name{font-weight:700}
+  .meta .since{font-size:12px;color:var(--muted)}
+
+  .smallControls{display:flex;gap:6px;margin-left:auto}
+  .smBtn{padding:6px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--muted);cursor:pointer}
+
+  /* chat area */
+  .chatWrap{flex:1;display:flex;flex-direction:column;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.006));border-radius:14px;padding:12px;height:calc(100vh - 140px);box-shadow:0 10px 40px rgba(2,6,23,0.6)}
+  .chatHeader{display:flex;align-items:center;gap:12px;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.03)}
+  .chatTitle{font-weight:700}
+  .chatStatus{font-size:13px;color:var(--muted)}
+  .messages{flex:1;padding:18px;overflow:auto;display:flex;flex-direction:column;gap:12px}
+  .bubble{max-width:70%;padding:12px;border-radius:12px;background:var(--card);position:relative;box-shadow:0 6px 18px rgba(2,6,23,0.4)}
+  .bubble.me{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#002233;align-self:flex-end}
+  .bubble .time{display:block;font-size:11px;color:rgba(255,255,255,0.7);margin-top:8px;text-align:right}
+  .bubble .controls{position:absolute;top:6px;left:6px;display:flex;gap:6px}
+  .thumb{max-width:360px;border-radius:10px;margin-top:8px;display:block}
+  .thumb video{max-width:100%}
+
+  .composer{display:flex;gap:10px;align-items:center;padding:10px;border-top:1px solid rgba(255,255,255,0.03)}
+  .composer textarea{flex:1;min-height:48px;max-height:140px;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit;resize:none}
+  .attach{padding:8px;border-radius:10px;border:1px dashed rgba(255,255,255,0.03);background:transparent;cursor:pointer}
+  .send{padding:10px 14px;border-radius:12px;border:none;background:linear-gradient(90deg,var(--accent),#2ec3ff);color:#002233;font-weight:700;cursor:pointer}
+
+  footer{padding:12px;text-align:center;color:var(--muted);font-size:13px}
+
+  /* modal overlay */
+  #authOverlay{
+    position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:80;
+    background:linear-gradient(180deg, rgba(2,6,23,0.6), rgba(2,6,23,0.6));backdrop-filter:blur(6px);
+  }
+  .modal{
+    width:420px;max-width:94%;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);
+    box-shadow:0 20px 60px rgba(2,6,23,0.6);
+  }
+  .modal h3{margin:0 0 8px 0}
+  .notify{
+    position:fixed;right:24px;bottom:24px;background:linear-gradient(90deg,var(--accent),var(--accent-2));padding:12px 16px;border-radius:12px;color:#002233;font-weight:700;box-shadow:0 10px 30px rgba(139,92,246,0.12);display:none;z-index:90
+  }
+
+  @media(max-width:900px){
+    .layout{padding:12px}
+    .sidebar{display:none}
+  }
+</style>
 </head>
 <body>
-  <div class="login-container">
-    <h1>تسجيل الدخول</h1>
-    <form id="login-form">
-      <input type="text" id="username" placeholder="اسم المستخدم" required>
-      <button type="submit">دخول</button>
-    </form>
+
+<header>
+  <div class="brand">
+    <div class="logo">ع</div>
+    <div>
+      <div>تسلسجرام — العرّاب</div>
+      <div class="sub">دردشة & مشاركة أسرع — Developed by <strong>KoZmo</strong></div>
+    </div>
   </div>
-  <script src="app.js"></script>
+
+  <div id="loggedArea" style="margin-left:auto;display:flex;gap:10px;align-items:center">
+    <div id="loggedInfo" style="display:none;align-items:center;gap:8px">
+      <div style="font-weight:700" id="loggedUser"></div>
+      <button class="smBtn" onclick="logout()">خروج</button>
+    </div>
+    <button class="smBtn" id="openAuthBtn" onclick="showAuthModal()">تسجيل / دخول</button>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="searchWrap">
+      <input id="searchUser" placeholder="ابحث عن مستخدم..." oninput="renderUsers()" />
+      <button class="smBtn" onclick="renderUsers()">🔎</button>
+    </div>
+    <button class="createBtn" onclick="showAuthModal()">إنشاء حساب / تسجيل</button>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:8px">المستخدمون</div>
+    <div id="usersList" class="usersList"></div>
+  </aside>
+
+  <section class="chatWrap">
+    <div class="chatHeader">
+      <div>
+        <div class="chatTitle" id="chatWith">العرّاب — اختر مستخدماً للبدء</div>
+        <div class="chatStatus" id="chatStatus">ابدأ محادثة خاصة بالنقر على اسم المستخدم</div>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+        <div id="devControls" style="display:none;">
+          <button class="smBtn" onclick="exportAll()">تصدير</button>
+          <button class="smBtn" onclick="wipeAll()">حذف كل البيانات</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="messages" class="messages"></div>
+
+    <div class="composer">
+      <input type="file" id="fileInput" accept="image/*,video/*" style="display:none" onchange="handleFile(event)" />
+      <button class="attach" onclick="document.getElementById('fileInput').click()">📎 إرفاق</button>
+      <textarea id="msgText" placeholder="اكتب رسالة أو تعليق... (اضغط Enter للإرسال)"></textarea>
+      <button class="send" onclick="sendMessage()">إرسال</button>
+    </div>
+  </section>
+</div>
+
+<footer>حقوق الملكية الفكرية © KoZmo — Developed with ❤️ and thanks to ChatGPT</footer>
+
+<!-- modal overlay -->
+<div id="authOverlay" aria-hidden="true"></div>
+
+<div class="notify" id="notify">تم الإرسال</div>
+
+<script>
+/* ====== Model & Init ====== */
+const DEV_USERNAME = 'KoZmo';
+const DEV_PASSWORD = 'KoZmo@12345';
+
+if(!localStorage.getItem('users')){
+  const u = {};
+  u[DEV_USERNAME] = { password: DEV_PASSWORD, createdAt: new Date().toISOString(), dev:true };
+  localStorage.setItem('users', JSON.stringify(u));
+}
+if(!localStorage.getItem('chats')) localStorage.setItem('chats', JSON.stringify({}));
+
+let currentUser = localStorage.getItem('loggedUser') || null;
+let currentPeer = null; // username of chat peer
+let pendingFile = null;
+
+/* ====== Helpers ====== */
+function loadUsers(){ return JSON.parse(localStorage.getItem('users')||'{}'); }
+function saveUsers(u){ localStorage.setItem('users', JSON.stringify(u)); }
+function loadChats(){ return JSON.parse(localStorage.getItem('chats')||'{}'); }
+function saveChats(c){ localStorage.setItem('chats', JSON.stringify(c)); }
+function uid(){ return 'm_'+Math.random().toString(36).slice(2,9); }
+function now(){ return new Date().toLocaleString(); }
+function chatKey(a,b){ if(!a||!b) return null; return [a,b].sort().join('__'); }
+function showNotify(text='تم', timeout=1800){ const n=document.getElementById('notify'); n.textContent=text; n.style.display='block'; setTimeout(()=>n.style.display='none', timeout); }
+
+/* ====== Auth Modal ====== */
+function showAuthModal(){
+  const overlay = document.getElementById('authOverlay');
+  overlay.style.display = 'flex';
+  overlay.innerHTML = `
+    <div class="modal" role="dialog" aria-modal="true">
+      <h3>تسجيل / دخول</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+        <input id="authUser" placeholder="اسم المستخدم" style="padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit" />
+        <input id="authPass" type="password" placeholder="كلمة السر" style="padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit" />
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="smBtn" onclick="closeAuthModal()">إلغاء</button>
+          <button class="createBtn" onclick="handleAuth()">تسجيل / دخول</button>
+        </div>
+        <div style="font-size:12px;color:var(--muted)">إن لم يكن الاسم مُسجّلاً فسيتم إنشاؤه تلقائياً. احفظ كلمة السر.</div>
+      </div>
+    </div>
+  `;
+  document.getElementById('authUser').focus();
+}
+
+function closeAuthModal(){
+  const overlay = document.getElementById('authOverlay');
+  overlay.style.display='none';
+  overlay.innerHTML='';
+}
+
+function handleAuth(){
+  const u = (document.getElementById('authUser').value||'').trim();
+  const p = (document.getElementById('authPass').value||'').trim();
+  if(!u || !p) return alert('أدخل اسم مستخدم وكلمة سر');
+  const users = loadUsers();
+  if(users[u]){
+    if(users[u].password !== p) return alert('كلمة السر غير صحيحة');
+  } else {
+    users[u] = { password: p, createdAt: new Date().toISOString(), dev:false };
+    saveUsers(users);
+    showNotify('تم إنشاء الحساب');
+  }
+  localStorage.setItem('loggedUser', u);
+  currentUser = u;
+  closeAuthModal();
+  postLogin();
+}
+
+/* ====== Post login UI setup ====== */
+function postLogin(){
+  document.getElementById('openAuthBtn').style.display='none';
+  document.getElementById('loggedInfo').style.display='flex';
+  document.getElementById('loggedUser').textContent = currentUser;
+  const users = loadUsers();
+  if(users[currentUser] && users[currentUser].dev){
+    document.getElementById('devControls').style.display='block';
+  } else {
+    document.getElementById('devControls').style.display='none';
+  }
+  renderUsers();
+  renderMessages();
+}
+
+/* ====== Users list ====== */
+function renderUsers(){
+  const list = document.getElementById('usersList');
+  const q = (document.getElementById('searchUser').value||'').trim().toLowerCase();
+  const users = loadUsers();
+  list.innerHTML = '';
+  const keys = Object.keys(users).sort();
+  if(keys.length===0){ list.innerHTML = '<div style="color:var(--muted)">لا توجد مستخدمين</div>'; return; }
+  keys.forEach(u=>{
+    if(q && !u.toLowerCase().includes(q)) return;
+    const el = document.createElement('div');
+    el.className='userItem';
+    el.onclick = ()=>openChat(u);
+    const avatar = document.createElement('div'); avatar.className='avatar'; avatar.textContent = u.slice(0,1).toUpperCase();
+    const meta = document.createElement('div'); meta.className='meta';
+    meta.innerHTML = `<div class="name">${u}${(users[u].dev? ' 🔷' : '')}</div><div class="since">عضو منذ ${new Date(users[u].createdAt).toLocaleDateString()}</div>`;
+    const ctrl = document.createElement('div'); ctrl.className='smallControls';
+    // chat button
+    const b1 = document.createElement('button'); b1.className='smBtn'; b1.textContent='دردشة';
+    b1.onclick = (ev)=>{ ev.stopPropagation(); openChat(u); };
+    ctrl.appendChild(b1);
+    // delete button for devs
+    const isDevView = (currentUser && users[currentUser] && users[currentUser].dev);
+    if(isDevView && u !== currentUser){
+      const b2 = document.createElement('button'); b2.className='smBtn'; b2.textContent='حذف';
+      b2.onclick = (ev)=>{ ev.stopPropagation(); deleteUser(u); };
+      ctrl.appendChild(b2);
+    }
+    el.appendChild(avatar); el.appendChild(meta); el.appendChild(ctrl);
+    list.appendChild(el);
+  });
+  if(list.childElementCount===0) list.innerHTML = `<div style="color:var(--muted)">لا يوجد مستخدم مطابق.</div>`;
+}
+
+/* ====== Chats & Messages ====== */
+function openChat(peer){
+  if(!currentUser){ showAuthModal(); return; }
+  if(peer === currentUser){ alert('لا يمكنك الدردشة مع نفسك'); return; }
+  currentPeer = peer;
+  document.getElementById('chatWith').textContent = 'دردشة مع ' + peer;
+  document.getElementById('chatStatus').textContent = '';
+  renderMessages();
+}
+
+function renderMessages(){
+  const container = document.getElementById('messages');
+  container.innerHTML = '';
+  if(!currentUser){ container.innerHTML = '<div style="color:var(--muted);padding:12px">سجل دخول لبدء المحادثة.</div>'; return; }
+  if(!currentPeer){ container.innerHTML = '<div style="color:var(--muted);padding:12px">اختر مستخدماً من اليسار لفتح محادثة.</div>'; return; }
+  const chats = loadChats();
+  const key = chatKey(currentUser, currentPeer);
+  const msgs = (chats[key]||[]).slice().sort((a,b)=> new Date(a.timeISO) - new Date(b.timeISO));
+  msgs.forEach(m=>{
+    const d = document.createElement('div');
+    d.className = 'bubble ' + (m.from === currentUser ? 'me' : '');
+    let html = '';
+    if(m.type === 'text') html += `<div>${escapeHtml(m.content)}</div>`;
+    else if(m.type === 'image') html += `<img src="${m.content}" class="thumb" />`;
+    else if(m.type === 'video') html += `<video controls class="thumb"><source src="${m.content}"></video>`;
+    html += `<span class="time">${m.time}</span>`;
+    if(m.from === currentUser || (loadUsers()[currentUser] && loadUsers()[currentUser].dev)){
+      html += `<div class="controls"><button class="smBtn" onclick="deleteMessage('${key}','${m.id}')">🗑️</button></div>`;
+    }
+    d.innerHTML = html;
+    container.appendChild(d);
+  });
+  setTimeout(()=>{ container.scrollTop = container.scrollHeight; },50);
+}
+
+/* ====== Sending ====== */
+async function sendMessage(){
+  const txtEl = document.getElementById('msgText');
+  const text = (txtEl.value||'').trim();
+  if(!currentUser){ showAuthModal(); return; }
+  if(!currentPeer){ alert('اختر مستخدماً للدردشة'); return; }
+  if(!text && !pendingFile) return alert('اكتب رسالة أو أضف ملف');
+  const key = chatKey(currentUser, currentPeer);
+  const chats = loadChats();
+  if(!chats[key]) chats[key] = [];
+  const timeISO = new Date().toISOString();
+  const msg = { id: uid(), from: currentUser, to: currentPeer, type:'text', content:'', time: now(), timeISO };
+  if(pendingFile){
+    try{
+      const data = await readFileAsDataURL(pendingFile);
+      msg.type = pendingFile.type.startsWith('video/') ? 'video' : 'image';
+      msg.content = data;
+      pendingFile = null;
+      document.getElementById('fileInput').value='';
+    } catch(e){ console.error(e); alert('خطأ بقراءة الملف'); return; }
+  } else {
+    msg.content = text;
+  }
+  chats[key].push(msg);
+  saveChats(chats);
+  txtEl.value='';
+  renderMessages();
+  showNotify('تم الإرسال');
+}
+
+/* ====== File attach ====== */
+function handleFile(e){
+  const f = e.target.files[0];
+  if(!f) return;
+  if(f.size > 60*1024*1024 && !confirm('الملف كبير. متابعة قد تكون بطيئة. متابعة؟')) { e.target.value=''; return; }
+  pendingFile = f;
+  document.getElementById('msgText').value = '[مرفق] ' + f.name;
+}
+
+/* ====== Delete message / user ====== */
+function deleteMessage(k, id){
+  if(!confirm('هل تريد حذف هذه الرسالة؟')) return;
+  const chats = loadChats();
+  if(!chats[k]) return;
+  chats[k] = chats[k].filter(m=>m.id !== id);
+  saveChats(chats);
+  renderMessages();
+}
+
+function deleteUser(username){
+  if(!confirm('سيتم حذف المستخدم وكل محادثاته. متابعة؟')) return;
+  const users = loadUsers();
+  delete users[username];
+  saveUsers(users);
+  const chats = loadChats();
+  Object.keys(chats).forEach(k=>{ if(k.includes(username)) delete chats[k]; });
+  saveChats(chats);
+  if(currentPeer === username) currentPeer = null;
+  renderUsers();
+  renderMessages();
+}
+
+/* ====== Admin functions ====== */
+function exportAll(){
+  if(!(loadUsers()[currentUser] && loadUsers()[currentUser].dev)) return alert('صلاحية للمطور فقط');
+  const dump = {users: loadUsers(), chats: loadChats()};
+  const blob = new Blob([JSON.stringify(dump, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'tsls_dump.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+function wipeAll(){
+  if(!(loadUsers()[currentUser] && loadUsers()[currentUser].dev)) return alert('صلاحية للمطور فقط');
+  if(!confirm('حذف كل البيانات من localStorage نهائيًا. متابعة؟')) return;
+  localStorage.clear();
+  location.reload();
+}
+
+/* ====== Utilities ====== */
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function readFileAsDataURL(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=()=>rej(r.error); r.readAsDataURL(file); }); }
+
+/* ====== Events & Load ====== */
+document.getElementById('msgText').addEventListener('keydown', (e)=>{ if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); } });
+
+window.addEventListener('load', ()=>{
+  // UI according to login
+  if(currentUser){
+    document.getElementById('openAuthBtn').style.display='none';
+    document.getElementById('loggedInfo').style.display='flex';
+    document.getElementById('loggedUser').textContent = currentUser;
+    const users = loadUsers();
+    if(users[currentUser] && users[currentUser].dev) document.getElementById('devControls').style.display='block';
+  } else {
+    document.getElementById('openAuthBtn').style.display='inline-block';
+    document.getElementById('loggedInfo').style.display='none';
+    // show modal automatically but not intrusive (comment/uncomment as you prefer)
+    showAuthModal();
+  }
+  renderUsers();
+  renderMessages();
+});
+</script>
 </body>
 </html>
